@@ -8,7 +8,7 @@ go:
   - 1.8.x
 
 before_install:
-  - make install-analysis-tools
+  - make install-tools
 
 script:
-- make analysis
+- make analysis test

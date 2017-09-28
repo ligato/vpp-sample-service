@@ -7,6 +7,27 @@ define analysis_only
     @echo "# done"
 endef
 
+# build vpp-agent plugin (bgp-vpp-agent)
+define build_bgpplugin
+    @echo "# building bgpplugin"
+    @cd agent && ${GO_ROOT}/bin/go build -v ${LDFLAGS}
+    @echo "# done"
+endef
+
+# build examples
+define build_example
+    @echo "# building examples"
+    @cd examples && ${GO_ROOT}/bin/go build -v ${LDFLAGS} end_to_end_example.go
+    @echo "# done"
+endef
+
+# clean bgpplugin
+define clean_bgpplugin
+    @echo "# cleaning bgpplugin"
+    @rm -f bgpplugin/plugin
+    @echo "# done"
+endef
+
 # install dependencies according to glide.yaml & glide.lock (in case vendor dir was deleted)
 define install_dependencies
 	$(if $(shell command -v glide install 2> /dev/null),$(info glide dependency manager is ready),$(error glide dependency manager missing, info about installation can be found here https://github.com/Masterminds/glide))
@@ -33,6 +54,12 @@ define fix_sirupsen_case_sensitivity_problem
     @-find ./ -type f -name "*.go" -exec sed -i -e 's/github.com\/Sirupsen\/logrus/github.com\/sirupsen\/logrus/g' {} \;
 endef
 
+
+# build all binaries
+build:
+	$(call build_bgpplugin)
+	$(call build_example)
+
 # get tools (analysis,mocking,...)
 install-tools:
 	@${GO_ROOT}/bin/go get -u -f "github.com/alecthomas/gometalinter"
@@ -45,6 +72,10 @@ install-tools:
 analysis:
 	$(call analysis_only)
 
+# clean
+clean:
+	$(call clean_bgpplugin)
+
 # install dependecies
 install-dep:
 	$(call install_dependencies)
@@ -55,8 +86,25 @@ update-dep:
 	$(call update_dependencies)
 	$(fix_sirupsen_case_sensitivity_problem)
 
+# generate plugin mock for tests
+generate-test-mocks:
+	    @mockgen -source=vendor/github.com/ligato/vpp-agent/clientv1/defaultplugins/data_change_api.go -destination=mocks/data_change_api.go -package=mocks -imports .=github.com/ligato/vpp-agent/clientv1/defaultplugins
+	    @mockgen -source=vendor/github.com/ligato/vpp-agent/clientv1/defaultplugins/data_resync_api.go -destination=mocks/data_resync_api.go -package=mocks -imports .=github.com/ligato/vpp-agent/clientv1/defaultplugins
+
+# run all tests
+test:
+	@echo "# running unit tests"
+	@go test $$(go list ./... | grep -v /vendor/)
+
+# get coverage percentage
+coverage:
+	@echo "# getting test coverage"
+	@go test -cover $$(go list ./... | grep -v /vendor/)
+
 # run all targets
 all:
 	$(call analysis_only)
+	$(call build_bgpplugin)
+	$(call build_example)
 
-.PHONY:analysis install-tools install-dep update-dep
+.PHONY: build analysis clean install-tools install-dep update-dep test coverage
