@@ -1,0 +1,14 @@
+dist: trusty
+sudo: required
+language: go
+
+go_import_path: github.com/ligato/vpp-sample-service
+
+go:
+  - 1.8.x
+
+before_install:
+  - make install-tools
+
+script:
+- make analysis test

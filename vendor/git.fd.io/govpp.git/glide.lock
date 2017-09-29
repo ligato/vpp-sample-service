@@ -1,0 +1,34 @@
+hash: d2f925bd432f2ecb4c13a9fafd03b3feb046c661190c978cb5b95507ed1ef80b
+updated: 2017-09-07T09:58:11.434867834+02:00
+imports:
+- name: github.com/bennyscetbun/jsongo
+  version: 5240b3f82c6665fe3ccd96bdf5e6f38fe1e1399d
+- name: github.com/fsnotify/fsnotify
+  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
+- name: github.com/lunixbochs/struc
+  version: ef56447db6a068ad9e52bc54a1aff5fb9e1ed2dd
+- name: github.com/pkg/profile
+  version: 5b67d428864e92711fcbd2f8629456121a56d91f
+- name: github.com/Sirupsen/logrus
+  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: golang.org/x/sys
+  version: e48874b42435b4347fc52bdee0424a52abc974d7
+  subpackages:
+  - unix
+testImports:
+- name: github.com/onsi/gomega
+  version: 334b8f472b3af5d541c5642701c1e29e2126f486
+  subpackages:
+  - format
+  - internal/assertion
+  - internal/asyncassertion
+  - internal/oraclematcher
+  - internal/testingtsupport
+  - matchers
+  - matchers/support/goraph/bipartitegraph
+  - matchers/support/goraph/edge
+  - matchers/support/goraph/node
+  - matchers/support/goraph/util
+  - types
+- name: gopkg.in/yaml.v2
+  version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
