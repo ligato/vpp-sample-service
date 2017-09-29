@@ -18,15 +18,53 @@ package main
 import (
 	"fmt"
 	"github.com/ligato/bgp-agent/bgp"
+	"github.com/ligato/bgp-agent/bgp/gobgp"
 	ligatoAgent "github.com/ligato/cn-infra/core"
+	"github.com/ligato/cn-infra/flavors/local"
 	"github.com/ligato/cn-infra/logging"
 	log "github.com/ligato/cn-infra/logging/logrus"
 	local_flavor "github.com/ligato/vpp-agent/flavors/local"
-	"github.com/ligato/vpp-sample-service/bgptol3plugin"
+	"github.com/ligato/vpp-agent/plugins/defaultplugins/ifplugin/model/interfaces"
+	"github.com/ligato/vpp-sample-service/plugins/vppl3bgp"
+	"github.com/ligato/vpp-sample-service/plugins/writer/l3writer"
+	"github.com/osrg/gobgp/config"
 	"os"
-	"pantheon.tech/ligato-bgp/agent/bgp/gobgp"
-	gobgpconfigs "pantheon.tech/ligato-bgp/agent/bgp/gobgp/configs"
 	"time"
+)
+
+var (
+	// memif1AsMaster is an a memory interface configuration used as next hop for sent BGP information.
+	memif1AsMaster = interfaces.Interfaces_Interface{
+		Name:    "memif1",
+		Type:    interfaces.InterfaceType_MEMORY_INTERFACE,
+		Enabled: true,
+		Memif: &interfaces.Interfaces_Interface_Memif{
+			Id:             1,
+			Master:         true,
+			SocketFilename: "/tmp/memif1.sock",
+		},
+		Mtu:         1500,
+		IpAddresses: []string{"192.168.1.1/24"},
+	}
+	flavor = &local.FlavorLocal{}
+
+	goBgpConfig = &config.Bgp{
+		Global: config.Global{
+			Config: config.GlobalConfig{
+				As:       65000,
+				RouterId: "172.18.0.1",
+				Port:     -1,
+			},
+		},
+		Neighbors: []config.Neighbor{
+			config.Neighbor{
+				Config: config.NeighborConfig{
+					PeerAs:          65001,
+					NeighborAddress: "172.18.0.2",
+				},
+			},
+		},
+	}
 )
 
 const (
@@ -47,6 +85,8 @@ func init() {
 
 // main runs end-to-end example that demonstrates sending prefix/nexthop information from route reflector to vpp
 func main() {
+	//Create required Interface for NH
+	PrepareVPPInterface()
 	// creating connection channel between bgp agent and bgp-vpp agent (and channel to stop them)
 	connectionChannel := make(chan bgp.ReachableIPRoute, 10)
 	bgpAgentStopChannel := make(chan struct{})
@@ -55,8 +95,8 @@ func main() {
 	logger := log.DefaultLogger()
 
 	// running agents in separate go routines
-	go runVPPAgentWithBGPtoL3Plugin(connectionChannel, vppAgentStopChannel, exampleStopChannel, logger)
-	go runBgpAgent(connectionChannel, bgpAgentStopChannel, vppAgentStopChannel, exampleStopChannel, logger)
+	runVPPAgentWithBGPtoL3Plugin(connectionChannel, vppAgentStopChannel, exampleStopChannel, logger)
+	runBgpAgent(connectionChannel, bgpAgentStopChannel, vppAgentStopChannel, exampleStopChannel, logger)
 
 	//stopping example run
 	stopAllAgentsIn(exampleDuration, bgpAgentStopChannel, exampleStopChannel, logger)
@@ -67,7 +107,10 @@ func main() {
 func runBgpAgent(connectionChannel chan bgp.ReachableIPRoute, bgpStopChannel chan struct{}, vppStopChannel chan struct{},
 	exampleStopChannel chan struct{}, logger logging.Logger) {
 	// creation of BGP agent
-	goBgpPlugin := gobgp.New(gobgpconfigs.AllInDocker)
+	goBgpPlugin := gobgp.New(gobgp.Deps{
+		PluginInfraDeps: *flavor.InfraDeps("example"),
+		SessionConfig:   goBgpConfig})
+
 	bgpAgentVar, err := bgpAgent.New([]*bgp.Plugin{&goBgpPlugin.Plugin})
 	if err != nil {
 		logger.Panic("BGP-Agent can't be created: %v", err)
@@ -125,8 +168,9 @@ func startBGPAgent(logger logging.Logger, bgpAgent bgp.Agent) (err error) {
 // runVPPAgentWithBGPtoL3Plugin starts the VPP-Agent with the BGP-to-L3 plugin
 func runVPPAgentWithBGPtoL3Plugin(bgpChannel chan bgp.ReachableIPRoute, vppAgentStopChannel chan struct{}, exampleStopChannel chan struct{}, logger logging.Logger) {
 	// Create BGP-to-L3 plugin that is plugin of the Vpp Agent
-	bgptol3 := bgptol3plugin.New(bgpChannel)
-
+	bgptol3 := vppl3bgp.New(vppl3bgp.Deps{
+		PluginInfraDeps: *flavor.InfraDeps("example"),
+	})
 	// plugins set(=flavor) for local linux environment with vpp
 	flavour := local_flavor.FlavorVppLocal{}
 
@@ -167,4 +211,9 @@ func waitUntilExampleEnd(sleepTime time.Duration, logger logging.Logger) {
 		logger.Warnf("Time to stop all agents is too low to observe expected behaviour. Time is raised to %v", sleepTime)
 	}
 	time.Sleep(sleepTime)
+}
+
+// PrepareVPPInterface creates initial structures inside VPP that are needed for prefix/next hop information sending.
+func PrepareVPPInterface() error {
+	return l3writer.DataResyncRequest("example").Interface(&memif1AsMaster).Send().ReceiveReply()
 }
