@@ -56,7 +56,10 @@ func NewInjectable(deps Deps) core.NamedPlugin {
 func (plugin *pluginImpl) Init() error {
 	if plugin.Deps.Renderer == nil {
 		plugin.Deps.Renderer = func(route *bgp.ReachableIPRoute) {
-			SendStaticRouteToVPP(route, PluginID)
+			err := SendStaticRouteToVPP(route, PluginID)
+			if err != nil {
+				plugin.Log.Errorf("Failed to send route %v to VPP. %v", route, err)
+			}
 		}
 	}
 
