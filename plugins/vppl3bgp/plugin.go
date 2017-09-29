@@ -66,11 +66,6 @@ func (plugin *pluginImpl) Init() error {
 	return nil
 }
 
-// stop stops plugin loop (and therefore go routine that consists only from this plugin loop)
-// This function is blocking until plugin loop stops operating.
-func (plugin *pluginImpl) stop() {
-}
-
 type Watcher interface {
 	Watch(subscriber string, callback func(*bgp.ReachableIPRoute))
 }
