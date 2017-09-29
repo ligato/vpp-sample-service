@@ -13,7 +13,7 @@
 // limitations under the License.
 
 //Package l3writer contains a BGP VPP Agent Writer implementation for L3 VPP Plugin
-package l3writer
+package vppl3bgp
 
 import (
 	"github.com/ligato/bgp-agent/bgp"
@@ -27,12 +27,7 @@ const description = "configuration used for Ligato VPP BGP"
 
 // SendStaticRouteToVPP send BGP information translated to L3 default plugin structures to VPP.
 func SendStaticRouteToVPP(info *bgp.ReachableIPRoute, pluginName core.PluginName) error {
-	return DataChangeRequest(pluginName).Put().StaticRoute(translate(info)).Send().ReceiveReply()
-}
-
-// translate translates bgp information from BGP-Agent API to VPP-Agent API.
-func translate(info *bgp.ReachableIPRoute) *l3.StaticRoutes_Route {
-	return Translate(info)
+	return localclient.DataChangeRequest(pluginName).Put().StaticRoute(Translate(info)).Send().ReceiveReply()
 }
 
 // Translate translates bgp information from BGP-Agent API to VPP-Agent API.
@@ -49,9 +44,4 @@ func Translate(info *bgp.ReachableIPRoute) *l3.StaticRoutes_Route {
 // DataResyncRequest allows to send RESYNC requests conveniently
 func DataResyncRequest(caller core.PluginName) defaultplugins.DataResyncDSL {
 	return localclient.DataResyncRequest(caller)
-}
-
-// DataChangeRequest allows to send Data Change requests conveniently
-func DataChangeRequest(caller core.PluginName) defaultplugins.DataChangeDSL {
-	return localclient.DataChangeRequest(caller)
 }

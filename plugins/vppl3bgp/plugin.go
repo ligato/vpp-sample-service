@@ -19,7 +19,6 @@ import (
 	"github.com/ligato/bgp-agent/bgp"
 	"github.com/ligato/cn-infra/core"
 	"github.com/ligato/cn-infra/flavors/local"
-	"github.com/ligato/vpp-sample-service/plugins/writer/l3writer"
 )
 
 // PluginID of BGP-to-L3 plugin
@@ -57,7 +56,7 @@ func NewInjectable(deps Deps) core.NamedPlugin {
 func (plugin *pluginImpl) Init() error {
 	if plugin.Deps.Renderer == nil {
 		plugin.Deps.Renderer = func(route *bgp.ReachableIPRoute) {
-			l3writer.SendStaticRouteToVPP(route, PluginID)
+			SendStaticRouteToVPP(route, PluginID)
 		}
 	}
 

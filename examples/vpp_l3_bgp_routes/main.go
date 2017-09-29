@@ -17,6 +17,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/docker/docker/daemon/logger"
 	"github.com/ligato/bgp-agent/bgp"
 	"github.com/ligato/bgp-agent/bgp/gobgp"
 	ligatoAgent "github.com/ligato/cn-infra/core"
@@ -26,9 +27,9 @@ import (
 	local_flavor "github.com/ligato/vpp-agent/flavors/local"
 	"github.com/ligato/vpp-agent/plugins/defaultplugins/ifplugin/model/interfaces"
 	"github.com/ligato/vpp-sample-service/plugins/vppl3bgp"
-	"github.com/ligato/vpp-sample-service/plugins/writer/l3writer"
 	"github.com/osrg/gobgp/config"
 	"os"
+	"pantheon.tech/ligato-bgp/bgp-vpp-agent/bgptol3plugin/writer/l3writer"
 	"time"
 )
 
@@ -85,13 +86,19 @@ func init() {
 
 // main runs end-to-end example that demonstrates sending prefix/nexthop information from route reflector to vpp
 func main() {
-	//Create required Interface for NH
+	//Create required Interface for Next Hop
 	PrepareVPPInterface()
-	// creating connection channel between bgp agent and bgp-vpp agent (and channel to stop them)
-	connectionChannel := make(chan bgp.ReachableIPRoute, 10)
-	bgpAgentStopChannel := make(chan struct{})
-	vppAgentStopChannel := make(chan struct{})
-	exampleStopChannel := make(chan struct{})
+
+	// creation of BGP agent
+	goBgpPlugin := gobgp.New(gobgp.Deps{
+		PluginInfraDeps: *flavor.InfraDeps("example"),
+		SessionConfig:   goBgpConfig})
+
+	bgpAgentVar, err := bgpAgent.New([]*bgp.Plugin{&goBgpPlugin.Plugin})
+	if err != nil { //FIXME use util
+		logger.Panic("BGP-Agent can't be created: %v", err)
+	}
+
 	logger := log.DefaultLogger()
 
 	// running agents in separate go routines
@@ -106,21 +113,8 @@ func main() {
 // runBgpAgent starts the BGP-Agent.
 func runBgpAgent(connectionChannel chan bgp.ReachableIPRoute, bgpStopChannel chan struct{}, vppStopChannel chan struct{},
 	exampleStopChannel chan struct{}, logger logging.Logger) {
-	// creation of BGP agent
-	goBgpPlugin := gobgp.New(gobgp.Deps{
-		PluginInfraDeps: *flavor.InfraDeps("example"),
-		SessionConfig:   goBgpConfig})
 
-	bgpAgentVar, err := bgpAgent.New([]*bgp.Plugin{&goBgpPlugin.Plugin})
-	if err != nil {
-		logger.Panic("BGP-Agent can't be created: %v", err)
-	}
 	logger.Debug("BGP-Agent successfully created.")
-
-	// watch for new BGP data
-	if err := bgpAgentVar.WatchIPRoutes("BGP-VPP Ligato plugin", bgp.ToChan(connectionChannel, logger)); err != nil {
-		logger.Panicf("Unable to watch BGP agent for learned BGP data: %v", err)
-	}
 
 	// start BGP-Agent and its plugins
 	if err := startBGPAgent(logger, bgpAgentVar); err != nil {
@@ -215,5 +209,5 @@ func waitUntilExampleEnd(sleepTime time.Duration, logger logging.Logger) {
 
 // PrepareVPPInterface creates initial structures inside VPP that are needed for prefix/next hop information sending.
 func PrepareVPPInterface() error {
-	return l3writer.DataResyncRequest("example").Interface(&memif1AsMaster).Send().ReceiveReply()
+	return vppl3bgp.DataResyncRequest("example").Interface(&memif1AsMaster).Send().ReceiveReply()
 }
