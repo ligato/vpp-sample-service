@@ -23,7 +23,7 @@ import (
 	"github.com/ligato/vpp-agent/plugins/defaultplugins/l3plugin/model/l3"
 )
 
-const description = "test"
+const description = "configuration used for Ligato VPP BGP"
 
 // SendStaticRouteToVPP send BGP information translated to L3 default plugin structures to VPP.
 func SendStaticRouteToVPP(info *bgp.ReachableIPRoute, pluginName core.PluginName) error {
