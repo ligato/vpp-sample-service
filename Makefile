@@ -1,5 +1,3 @@
-GO_ROOT="/usr/local/go"
-
 # run code analysis
 define analysis_only
     @echo "# running code analysis"
@@ -10,14 +8,14 @@ endef
 # build vpp-agent plugin (bgp-vpp-agent)
 define build_bgpplugin
     @echo "# building bgpplugin"
-    @cd agent && ${GO_ROOT}/bin/go build -v ${LDFLAGS}
+    @cd agent && go build -v ${LDFLAGS}
     @echo "# done"
 endef
 
 # build examples
 define build_example
     @echo "# building examples"
-    @cd examples && ${GO_ROOT}/bin/go build -v ${LDFLAGS} end_to_end_example.go
+    @cd examples && go build -v ${LDFLAGS} end_to_end_example.go
     @echo "# done"
 endef
 
@@ -62,11 +60,11 @@ build:
 
 # get tools (analysis,mocking,...)
 install-tools:
-	@${GO_ROOT}/bin/go get -u -f "github.com/alecthomas/gometalinter"
+	@go get -u -f "github.com/alecthomas/gometalinter"
 	@gometalinter --install
-	@${GO_ROOT}/bin/go get -u -f "github.com/golang/mock/gomock"
-	@${GO_ROOT}/bin/go get -u -f "github.com/golang/mock/mockgen"
-	@${GO_ROOT}/bin/go install "github.com/golang/mock/mockgen"
+	@go get -u -f "github.com/golang/mock/gomock"
+	@go get -u -f "github.com/golang/mock/mockgen"
+	@go install "github.com/golang/mock/mockgen"
 
 # run & print code analysis
 analysis:
