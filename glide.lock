@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 hash: 46cb6e7923a8ca858435407ce4737fa5eda4a470cfc59a61e752580702e06c22
 updated: 2017-09-28T17:07:27.86448619+02:00
+=======
+hash: 99a93478130eac91b13adf31c8b8e63677cee1fb4157987a66f42e8c868e4751
+updated: 2017-10-06T13:03:02.888041111+02:00
+>>>>>>> 00ed269... Update glide
 imports:
 - name: git.fd.io/govpp.git
-  version: f2cbe790a5c3c3e8cb59b592c252b2b84025bd91
+  version: 03bc1c23595e998e8fa75a65e23bedfbec115643
   repo: https://git.fd.io/govpp.git
   subpackages:
   - adapter
@@ -81,6 +86,10 @@ imports:
   version: 4bd1920723d7b7c925de087aa32e2187708897f7
   subpackages:
   - proto
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: bcd8bc72b08df0f70df986b97f95590779502d31
 - name: github.com/hashicorp/go-cleanhttp
   version: 3573b8b52aa7b37b9358d966a898feb387f62437
 - name: github.com/hashicorp/hcl
@@ -101,12 +110,16 @@ imports:
   - models
   - pkg/escape
 - name: github.com/ligato/bgp-agent
+<<<<<<< HEAD
   version: ece36289215a239884dbfd2c69ac0646706062f6
+=======
+  version: af16cc65902a1b42d7899929119bdb77a39348c5
+>>>>>>> 00ed269... Update glide
   subpackages:
   - bgp
   - bgp/gobgp
 - name: github.com/ligato/cn-infra
-  version: 517f64979feb8e5b9ffd7733ff7bf63b76fbb1df
+  version: d80416b19b308869c3395163e4783f63bbc96f2b
   subpackages:
   - config
   - core
@@ -117,17 +130,20 @@ imports:
   - flavors/local
   - health/statuscheck
   - health/statuscheck/model/status
+  - health/statuscheck/pluginstatusmap
   - idxmap
   - idxmap/mem
   - logging
+  - logging/logmanager
   - logging/logroot
   - logging/logrus
   - messaging
+  - rpc/rest
   - servicelabel
   - utils/addrs
   - utils/safeclose
 - name: github.com/ligato/vpp-agent
-  version: e7dfda79abe83483751d6c3f3badf7a8eba05f9e
+  version: 8b61778490fa4a22df294b0682c13e39b8f51869
   subpackages:
   - clientv1/defaultplugins
   - clientv1/defaultplugins/dbadapter
@@ -152,6 +168,7 @@ imports:
   - plugins/defaultplugins/ifplugin/bin_api/interfaces
   - plugins/defaultplugins/ifplugin/bin_api/ip
   - plugins/defaultplugins/ifplugin/bin_api/memif
+  - plugins/defaultplugins/ifplugin/bin_api/stats
   - plugins/defaultplugins/ifplugin/bin_api/tap
   - plugins/defaultplugins/ifplugin/bin_api/vpe
   - plugins/defaultplugins/ifplugin/bin_api/vxlan
@@ -257,6 +274,8 @@ imports:
   subpackages:
   - assert
   - assert
+- name: github.com/unrolled/render
+  version: a0ec58421ddf111bd7efd3b7087399ca7d5da2f1
 - name: github.com/vishvananda/netlink
   version: f5a6f697a596c788d474984a38a0ac4ba0719e93
   subpackages:

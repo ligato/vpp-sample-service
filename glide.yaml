@@ -1,7 +1,7 @@
 package: github.com/ligato/vpp-sample-service
 import:
 - package: github.com/ligato/cn-infra
-  version: 517f64979feb8e5b9ffd7733ff7bf63b76fbb1df
+  version: d80416b19b308869c3395163e4783f63bbc96f2b
   subpackages:
   - config
   - core
@@ -22,7 +22,7 @@ import:
   - utils/addrs
   - utils/safeclose
 - package: github.com/ligato/vpp-agent
-  version: e7dfda79abe83483751d6c3f3badf7a8eba05f9e
+  version: 8b61778490fa4a22df294b0682c13e39b8f51869
   subpackages:
   - clientv1/defaultplugins
   - clientv1/defaultplugins/dbadapter
@@ -72,7 +72,11 @@ import:
   - plugins/linuxplugin/linuxcalls
   - plugins/linuxplugin/model/interfaces
 - package: github.com/ligato/bgp-agent
+<<<<<<< HEAD
   version: ece36289215a239884dbfd2c69ac0646706062f6
+=======
+  version: af16cc65902a1b42d7899929119bdb77a39348c5
+>>>>>>> 00ed269... Update glide
   subpackages:
   - bgp
   - bgp/gobgp
@@ -82,7 +86,7 @@ import:
   subpackages:
   - gomock
 - package: git.fd.io/govpp.git
-  version: f2cbe790a5c3c3e8cb59b592c252b2b84025bd91
+  version: 03bc1c23595e998e8fa75a65e23bedfbec115643
   repo: https://git.fd.io/govpp.git
   subpackages:
   - adapter
