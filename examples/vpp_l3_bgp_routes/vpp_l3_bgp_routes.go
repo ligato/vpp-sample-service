@@ -16,8 +16,10 @@
 package main
 
 import (
+	"github.com/golang/protobuf/proto"
 	"github.com/ligato/bgp-agent/bgp/gobgp"
 	"github.com/ligato/cn-infra/core"
+	"github.com/ligato/cn-infra/datasync"
 	"github.com/ligato/cn-infra/flavors/local"
 	"github.com/ligato/cn-infra/logging"
 	"github.com/ligato/cn-infra/logging/logroot"
@@ -74,7 +76,10 @@ func main() {
 	deps := *flavor.InfraDeps(bgptol3PluginName)
 	deps.Log.SetLevel(logging.DebugLevel)
 
-	pluginInterface := NewPluginVPPInterface()
+	pluginInterface := &core.NamedPlugin{
+		PluginName: bgptol3PluginName,
+		Plugin:     &pluginVPPInterface{deps},
+	}
 
 	goBgpPlugin := gobgp.New(gobgp.Deps{
 		PluginInfraDeps: deps,
@@ -89,12 +94,16 @@ func main() {
 	// plugins set(=flavor) for local linux environment with vpp
 	flavour := local_flavor.FlavorVppLocal{}
 
+	flavour.VPP.Publish = &nilPublisher{}
+	flavour.VPP.PublishStatistics = &nilPublisher{}
+	flavour.VPP.IfStatePub = &nilPublisher{}
+
 	goBgpPluginCoreNamed := core.NamedPlugin{
 		PluginName: goBgpPlugin.PluginName,
 		Plugin:     goBgpPlugin}
 
 	// Create new ligato agent
-	agent := core.NewAgent(logroot.StandardLogger(), 2*time.Minute, append(flavour.Plugins(), pluginInterface,
+	agent := core.NewAgent(logroot.StandardLogger(), 4*time.Minute, append(flavour.Plugins(), pluginInterface,
 		&bgptol3, &goBgpPluginCoreNamed)...)
 
 	// Run agent in event loop
@@ -105,13 +114,7 @@ func main() {
 }
 
 type pluginVPPInterface struct {
-}
-
-func NewPluginVPPInterface() *core.NamedPlugin {
-	return &core.NamedPlugin{
-		PluginName: bgptol3PluginName,
-		Plugin:     &pluginVPPInterface{},
-	}
+	local.PluginInfraDeps
 }
 
 // Init creates initial structures inside VPP that are needed for prefix/next hop information sending.
@@ -119,6 +122,13 @@ func (plugin *pluginVPPInterface) Init() error {
 	return localclient.DataResyncRequest(bgptol3PluginName).Interface(&memif1AsMaster).Send().ReceiveReply()
 }
 
+type nilPublisher struct{}
+
+func (*nilPublisher) Put(key string, data proto.Message, opts ...datasync.PutOption) error {
+	return nil
+}
+
+// Close closes pluginVPPInterface
 func (plugin *pluginVPPInterface) Close() error {
 	return nil
 }

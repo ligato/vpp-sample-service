@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-hash: 46cb6e7923a8ca858435407ce4737fa5eda4a470cfc59a61e752580702e06c22
-updated: 2017-09-28T17:07:27.86448619+02:00
-=======
-hash: 99a93478130eac91b13adf31c8b8e63677cee1fb4157987a66f42e8c868e4751
-updated: 2017-10-06T13:03:02.888041111+02:00
->>>>>>> 00ed269... Update glide
+hash: 789e8a6a92d25b9e8df53a83fd8ff40705900c68a7ab23d4d4a5f0d745da35e8
+updated: 2017-10-09T17:53:03.102004493+02:00
 imports:
 - name: git.fd.io/govpp.git
   version: 03bc1c23595e998e8fa75a65e23bedfbec115643
@@ -110,11 +105,7 @@ imports:
   - models
   - pkg/escape
 - name: github.com/ligato/bgp-agent
-<<<<<<< HEAD
-  version: ece36289215a239884dbfd2c69ac0646706062f6
-=======
-  version: af16cc65902a1b42d7899929119bdb77a39348c5
->>>>>>> 00ed269... Update glide
+  version: f0ce5e63f2657387bf8af683ebdd55ec56929796
   subpackages:
   - bgp
   - bgp/gobgp

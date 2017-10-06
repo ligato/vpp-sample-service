@@ -1,0 +1,5 @@
+time="2017-10-09T15:53:48Z" level=info msg="gobgpd started"
+time="2017-10-09T15:53:48Z" level=info msg="Finished reading the config file" Topic=Config
+time="2017-10-09T15:53:48Z" level=info msg="Peer 172.18.0.1 is added"
+time="2017-10-09T15:53:48Z" level=info msg="Add a peer configuration for:172.18.0.1" Topic=Peer
+time="2017-10-09T15:55:26Z" level=info msg="Peer Up" Key=172.18.0.1 State=BGP_FSM_OPENCONFIRM Topic=Peer
