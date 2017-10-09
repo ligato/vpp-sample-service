@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//Package l3writer contains a BGP VPP Agent Writer implementation for L3 VPP Plugin
+//Package vppl3bgp contains a BGP VPP Agent Writer implementation for L3 VPP Plugin
 package vppl3bgp
 
 import (
 	"github.com/ligato/bgp-agent/bgp"
 	"github.com/ligato/cn-infra/core"
-	"github.com/ligato/vpp-agent/clientv1/defaultplugins"
 	"github.com/ligato/vpp-agent/clientv1/defaultplugins/localclient"
 	"github.com/ligato/vpp-agent/plugins/defaultplugins/l3plugin/model/l3"
 )
@@ -39,9 +38,4 @@ func Translate(info *bgp.ReachableIPRoute) *l3.StaticRoutes_Route {
 		Description: description,
 		Weight:      1,
 		Preference:  0}
-}
-
-// DataResyncRequest allows to send RESYNC requests conveniently
-func DataResyncRequest(caller core.PluginName) defaultplugins.DataResyncDSL {
-	return localclient.DataResyncRequest(caller)
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package agent provides core agent functionality (e.g.VPP-Agent plugin implementation)
+// Package vppl3bgp provides core agent functionality (e.g.VPP-Agent plugin implementation)
 package vppl3bgp
 
 import (
@@ -28,27 +28,23 @@ const PluginID core.PluginName = "bgp-to-l3-plugin"
 // it handles information coming for BGP-Agent channel and sends them transformed to L3 default plugin.
 type pluginImpl struct {
 	Deps
+	reg bgp.WatchRegistration
 }
 
+// Deps combines all needed dependencies for Plugin struct. These dependencies should be injected into Plugin by using constructor's Deps parameter.
 type Deps struct {
 	local.PluginInfraDeps //inject
 	Watcher               Watcher
 	Renderer              func(*bgp.ReachableIPRoute) //inject optional (mainly for testing purposes)
 }
 
-// New creates Plugin with BGP functionality
+// New creates Plugin with BGP functionality with an specific writer implementation
 func New(deps Deps) core.NamedPlugin {
-	return NewInjectable(deps)
-}
-
-// NewInjectable creates Plugin with BGP functionality with an specific writer implementation
-func NewInjectable(deps Deps) core.NamedPlugin {
-	pluginVar := &pluginImpl{
-		Deps: deps,
-	}
 	return core.NamedPlugin{
 		PluginName: PluginID,
-		Plugin:     pluginVar,
+		Plugin: &pluginImpl{
+			Deps: deps,
+		},
 	}
 }
 
@@ -56,6 +52,7 @@ func NewInjectable(deps Deps) core.NamedPlugin {
 func (plugin *pluginImpl) Init() error {
 	if plugin.Deps.Renderer == nil {
 		plugin.Deps.Renderer = func(route *bgp.ReachableIPRoute) {
+			plugin.Log.Debugf("SendStaticRouteToVPP %v", route)
 			err := SendStaticRouteToVPP(route, PluginID)
 			if err != nil {
 				plugin.Log.Errorf("Failed to send route %v to VPP. %v", route, err)
@@ -63,11 +60,19 @@ func (plugin *pluginImpl) Init() error {
 		}
 	}
 
+	reg, err := plugin.Watcher.WatchIPRoutes("BGP-VPP Ligato plugin", plugin.Deps.Renderer)
+	plugin.reg = reg
 	plugin.Log.Info("Initialization of the BGP plugin has completed")
-	plugin.Watcher.Watch("BGP-VPP Ligato plugin", plugin.Deps.Renderer)
-	return nil
+	return err
 }
 
+//Close ends the agreement between Plugin and watcher. Plugin stops sending watcher any further notifications.
+func (plugin *pluginImpl) Close() error {
+	return plugin.reg.Close()
+}
+
+//Watcher common interface between Ligato BGP Plugin for register watcher to notifications
 type Watcher interface {
-	Watch(subscriber string, callback func(*bgp.ReachableIPRoute))
+	//WatchIPRoutes register watcher to notifications for any new learned IP-based routes.
+	WatchIPRoutes(watcher string, callback func(*bgp.ReachableIPRoute)) (bgp.WatchRegistration, error)
 }
