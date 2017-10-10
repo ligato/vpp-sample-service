@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-# get required tools
-get-tools:
-	    @go get -u -f "github.com/alecthomas/gometalinter"
-	    @go install "github.com/alecthomas/gometalinter"
-=======
 include Makeroutines.mk
 
 # fix sirupsen/Sirupsen problem
@@ -35,7 +29,6 @@ update-dep:
 	@echo "# update dependencies"
 	$(call update_dependencies)
 	$(fix_sirupsen_case_sensitivity_problem)
->>>>>>> 00ed269... Update glide
 
 # run checkstyle
 checkstyle:
@@ -43,9 +36,6 @@ checkstyle:
 	    @gometalinter --vendor --exclude=vendor --deadline 1m --enable-gc --disable=aligncheck --disable=gotype --exclude=mock ./...
 	    @echo "# done"
 
-<<<<<<< HEAD
-.PHONY: get-tools checkstyle
-=======
 # build examples
 build-examples:
 		@echo "# building plugin examples"
@@ -83,4 +73,3 @@ all:
 	    @make clean
 
 .PHONY: build install-dep update-dep checkstyle coverage clean all run-examples
->>>>>>> 00ed269... Update glide

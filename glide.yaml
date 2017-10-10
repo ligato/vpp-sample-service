@@ -72,11 +72,7 @@ import:
   - plugins/linuxplugin/linuxcalls
   - plugins/linuxplugin/model/interfaces
 - package: github.com/ligato/bgp-agent
-<<<<<<< HEAD
-  version: ece36289215a239884dbfd2c69ac0646706062f6
-=======
-  version: af16cc65902a1b42d7899929119bdb77a39348c5
->>>>>>> 00ed269... Update glide
+  version: f0ce5e63f2657387bf8af683ebdd55ec56929796
   subpackages:
   - bgp
   - bgp/gobgp

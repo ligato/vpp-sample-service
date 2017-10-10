@@ -1,14 +1,16 @@
+include Makeroutines.mk
+
 # run code analysis
 define analysis_only
-    @echo "# running code analysis"
-    @gometalinter --vendor --exclude=vendor --deadline 1m --enable-gc --disable=aligncheck ./...
-    @echo "# done"
+	@echo "# running code analysis"
+	@gometalinter --vendor --exclude=vendor --deadline 1m --enable-gc --disable=aligncheck --disable=gotype --exclude=mock ./...
+	@echo "# done"
 endef
 
 # build vpp-agent plugin (bgp-vpp-agent)
 define build_bgpplugin
     @echo "# building bgpplugin"
-    @cd agent && go build -v ${LDFLAGS}
+    @cd plugins && go build -a -v ${LDFLAGS}
     @echo "# done"
 endef
 
@@ -19,44 +21,26 @@ define build_example
     @echo "# done"
 endef
 
-# clean bgpplugin
-define clean_bgpplugin
-    @echo "# cleaning bgpplugin"
-    @rm -f bgpplugin/plugin
-    @echo "# done"
-endef
-
-# install dependencies according to glide.yaml & glide.lock (in case vendor dir was deleted)
-define install_dependencies
-	$(if $(shell command -v glide install 2> /dev/null),$(info glide dependency manager is ready),$(error glide dependency manager missing, info about installation can be found here https://github.com/Masterminds/glide))
-	@echo "# installing dependencies, please wait ..."
-	@glide install --strip-vendor
-endef
-
-# clean update dependencies according to glide.yaml (re-downloads all of them)
-define update_dependencies
-	$(if $(shell command -v glide install 2> /dev/null),$(info glide dependency manager is ready),$(error glide dependency manager missing, info about installation can be found here https://github.com/Masterminds/glide))
-	@echo "# updating dependencies, please wait ..."
-	@-cd vendor && rm -rf *
-	@echo "# vendor dir cleared"
-	@-rm -rf glide.lock
-	@glide cc
-	@echo "# glide cache cleared"
-	@glide install --strip-vendor
-endef
-
-# fix sirupsen/Sirupsen problem
-define fix_sirupsen_case_sensitivity_problem
-    @echo "# fixing sirupsen case sensitivity problem, please wait ..."
-    @-rm -rf vendor/github.com/Sirupsen
-    @-find ./ -type f -name "*.go" -exec sed -i -e 's/github.com\/Sirupsen\/logrus/github.com\/sirupsen\/logrus/g' {} \;
-endef
-
+# run all targets
+all:
+	@echo "# running all"
+	@make install-tools
+	@make install-dep
+	@make update-dep
+	@make analysis
+	@make build
+	@make run-examples
+	@make clean-examples
 
 # build all binaries
 build:
-	$(call build_bgpplugin)
-	$(call build_example)
+	@echo "# building"
+	@go build -a ./plugins/...
+	@echo "# done"
+
+# run & print code analysis
+analysis:
+	$(call analysis_only)
 
 # get tools (analysis,mocking,...)
 install-tools:
@@ -65,14 +49,6 @@ install-tools:
 	@go get -u -f "github.com/golang/mock/gomock"
 	@go get -u -f "github.com/golang/mock/mockgen"
 	@go install "github.com/golang/mock/mockgen"
-
-# run & print code analysis
-analysis:
-	$(call analysis_only)
-
-# clean
-clean:
-	$(call clean_bgpplugin)
 
 # install dependecies
 install-dep:
@@ -84,25 +60,27 @@ update-dep:
 	$(call update_dependencies)
 	$(fix_sirupsen_case_sensitivity_problem)
 
-# generate plugin mock for tests
-generate-test-mocks:
-	    @mockgen -source=vendor/github.com/ligato/vpp-agent/clientv1/defaultplugins/data_change_api.go -destination=mocks/data_change_api.go -package=mocks -imports .=github.com/ligato/vpp-agent/clientv1/defaultplugins
-	    @mockgen -source=vendor/github.com/ligato/vpp-agent/clientv1/defaultplugins/data_resync_api.go -destination=mocks/data_resync_api.go -package=mocks -imports .=github.com/ligato/vpp-agent/clientv1/defaultplugins
+# get coverage percentage
+coverage:
+	@echo "# getting test coverage"
+	@go test -cover $$(go list ./... | grep -v /vendor/)
 
 # run all tests
 test:
 	@echo "# running unit tests"
 	@go test $$(go list ./... | grep -v /vendor/)
 
-# get coverage percentage
-coverage:
-	@echo "# getting test coverage"
-	@go test -cover $$(go list ./... | grep -v /vendor/)
+# run examples
+run-examples:
+	@echo "# running examples"
+	@./scripts/run_vpp_l3_bgp_routes.sh
+	@echo "# done"
 
-# run all targets
-all:
-	$(call analysis_only)
-	$(call build_bgpplugin)
-	$(call build_example)
+# run clean examples
+clean-examples:
+	@rm -f examples/gobgp_watch_plugin/gobgp_watch_plugin
+	@rm -f docker/gobgp_route_reflector/gobgp-client-in-docker/log
+	@rm -f ./log
+	@rm -f ./fib
 
-.PHONY: build analysis clean install-tools install-dep update-dep test coverage
+.PHONY: build analysis clean-example install-tools install-dep update-dep run-examples all
