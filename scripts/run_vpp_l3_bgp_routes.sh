@@ -57,7 +57,8 @@ echo "done"
 echo "#### checking the VPP's FIB table for the entry corresponding to the route added into the Route reflector"
 ./docker/dev_bgp_to_vpp/scripts/check-vpp-fib.sh > fib &
 sleep 5
-expected=("101.0.10.1/32
+expected=("101.0.10.0/24
+101.0.10.1/32
 ")
 testOutput "$(less fib)" "${expected}"
 echo "done"

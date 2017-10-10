@@ -44,7 +44,7 @@ var (
 			SocketFilename: "/tmp/memif1.sock",
 		},
 		Mtu:         1500,
-		IpAddresses: []string{"192.168.1.1/24"},
+		IpAddresses: []string{"101.0.10.0/24"},
 	}
 	flavor = &local.FlavorLocal{}
 

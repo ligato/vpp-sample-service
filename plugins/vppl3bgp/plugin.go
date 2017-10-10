@@ -12,17 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package vppl3bgp provides core agent functionality (e.g.VPP-Agent plugin implementation)
+// Package vppl3bgp implements the Vpp sample service plugin that allows plugin
+// to render learned IP-based routes to l3 plugin.
 package vppl3bgp
 
 import (
 	"github.com/ligato/bgp-agent/bgp"
 	"github.com/ligato/cn-infra/core"
 	"github.com/ligato/cn-infra/flavors/local"
+	"github.com/ligato/vpp-agent/clientv1/defaultplugins/localclient"
+	"github.com/ligato/vpp-agent/plugins/defaultplugins/l3plugin/model/l3"
 )
 
-// PluginID of BGP-to-L3 plugin
-const PluginID core.PluginName = "bgp-to-l3-plugin"
+// pluginID of BGP-to-L3 plugin
+const pluginID core.PluginName = "bgp-to-l3-plugin"
+
+// description for l3 StaticRoutes_Route
+const description = "configuration used for Ligato VPP BGP"
 
 // Plugin with BGP functionality (VPP Agent plugin that servers as BGP-VPP Agent)
 // it handles information coming for BGP-Agent channel and sends them transformed to L3 default plugin.
@@ -38,22 +44,24 @@ type Deps struct {
 	Renderer              func(*bgp.ReachableIPRoute) //inject optional (mainly for testing purposes)
 }
 
-// New creates Plugin with BGP functionality with an specific writer implementation
+// New creates Plugin with learned IP-based route to l3 plugin rendering functionality by default.
+// Renderer can be injected via Dependencies <deps>
 func New(deps Deps) core.NamedPlugin {
 	return core.NamedPlugin{
-		PluginName: PluginID,
+		PluginName: pluginID,
 		Plugin: &pluginImpl{
 			Deps: deps,
 		},
 	}
 }
 
-// Init logs attempt of plugin initialization to be sure that plugin is properly recognized. No initialization of plugin is not needed yet.
+// Init logs attempt of plugin initialization to be sure that plugin is properly recognized. No initialization
+// of plugin is not needed yet.
 func (plugin *pluginImpl) Init() error {
 	if plugin.Deps.Renderer == nil {
 		plugin.Deps.Renderer = func(route *bgp.ReachableIPRoute) {
 			plugin.Log.Debugf("SendStaticRouteToVPP %v", route)
-			err := SendStaticRouteToVPP(route, PluginID)
+			err := localclient.DataChangeRequest(pluginID).Put().StaticRoute(translate(route)).Send().ReceiveReply()
 			if err != nil {
 				plugin.Log.Errorf("Failed to send route %v to VPP. %v", route, err)
 			}
@@ -64,6 +72,17 @@ func (plugin *pluginImpl) Init() error {
 	plugin.reg = reg
 	plugin.Log.Info("Initialization of the BGP plugin has completed")
 	return err
+}
+
+// translate translates bgp information from BGP-Agent API to VPP-Agent API.
+func translate(info *bgp.ReachableIPRoute) *l3.StaticRoutes_Route {
+	return &l3.StaticRoutes_Route{
+		VrfId:       0,
+		DstIpAddr:   info.Prefix,
+		NextHopAddr: info.Nexthop.String(),
+		Description: description,
+		Weight:      1,
+		Preference:  0}
 }
 
 //Close ends the agreement between Plugin and watcher. Plugin stops sending watcher any further notifications.
