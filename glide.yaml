@@ -72,7 +72,7 @@ import:
   - plugins/linuxplugin/linuxcalls
   - plugins/linuxplugin/model/interfaces
 - package: github.com/ligato/bgp-agent
-  version: f0ce5e63f2657387bf8af683ebdd55ec56929796
+  version: eb9cda59c6c44b8c6e51e8bcc3f738a15c714983
   subpackages:
   - bgp
   - bgp/gobgp
