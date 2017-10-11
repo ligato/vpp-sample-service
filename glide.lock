@@ -1,5 +1,5 @@
-hash: 789e8a6a92d25b9e8df53a83fd8ff40705900c68a7ab23d4d4a5f0d745da35e8
-updated: 2017-10-09T17:53:03.102004493+02:00
+hash: 4b371594401cb6b01f489284cfa1f6080d5ccc474925e9d1b6ff72fb1021c69b
+updated: 2017-10-11T11:23:36.866079189+02:00
 imports:
 - name: git.fd.io/govpp.git
   version: 03bc1c23595e998e8fa75a65e23bedfbec115643
@@ -105,7 +105,7 @@ imports:
   - models
   - pkg/escape
 - name: github.com/ligato/bgp-agent
-  version: f0ce5e63f2657387bf8af683ebdd55ec56929796
+  version: eb9cda59c6c44b8c6e51e8bcc3f738a15c714983
   subpackages:
   - bgp
   - bgp/gobgp
