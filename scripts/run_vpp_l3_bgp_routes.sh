@@ -14,7 +14,7 @@ VENDOR_BGP_AGENT_RR_DOCKER=$VENDOR_BGP_AGENT_DOCKER"/gobgp_route_reflector"
 
 #####Run VPP Dockers ##################################################
 .$VENDOR_BGP_AGENT_RR_DOCKER/start-routereflector.sh gobgp-client-in-docker
-./docker/dev_bgp_to_vpp/scripts/start-vpp-endpoint.sh
+./docker/dev_bgp_to_vpp/scripts/start-bgp-to-vpp.sh
 
 
 #####Add Path##################################################
@@ -40,7 +40,7 @@ testOutput "$(less fib)" "${expected}"
 
 #####Close Dockers##################################################
 .$VENDOR_BGP_AGENT_RR_DOCKER/stop-routereflector.sh
-./docker/dev_bgp_to_vpp/scripts/stop-vpp-endpoint.sh
+./docker/dev_bgp_to_vpp/scripts/stop-bgp-to-vpp.sh
 .$VENDOR_BGP_AGENT_RR_DOCKER/remove-ligato-network-for-docker.sh
 ##########################################################################
 exit ${exitCode}
