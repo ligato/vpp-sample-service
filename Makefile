@@ -3,7 +3,7 @@ include Makeroutines.mk
 # run code analysis
 define analysis_only
 	@echo "# running code analysis"
-	@gometalinter --vendor --exclude=vendor --deadline 1m --enable-gc --disable=aligncheck --disable=gotype --exclude=mock ./...
+	@gometalinter --vendor --exclude=vendor --deadline 1m --enable-gc --disable=aligncheck --disable=gotype --disable=gotypex --exclude=mock ./...
 	@echo "# done"
 endef
 
