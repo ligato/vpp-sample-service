@@ -93,7 +93,7 @@ run-examples:
 clean-examples:
 	@rm -f examples/gobgp_watch_plugin/gobgp_watch_plugin
 	@rm -f docker/gobgp_route_reflector/gobgp-client-in-docker/log
-	@rm -f ./log
-	@rm -f ./fib
+	@rm -f log
+	@rm -f fib
 
-.PHONY: build analysis clean-example install-tools install-dep update-dep run-examples all test test-cover clean-examples coverage
+.PHONY: build analysis install-tools install-dep update-dep run-examples all test test-cover clean-examples coverage

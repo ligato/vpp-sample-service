@@ -58,7 +58,7 @@ echo "#### checking the VPP's FIB table for the entry corresponding to the route
 ./docker/dev_bgp_to_vpp/scripts/check-vpp-fib.sh > fib &
 sleep 5
 expected=("101.0.10.0/24
-101.0.10.1/32
+arp-ipv4: via 101.0.10.1 memif0/1
 ")
 testOutput "$(less fib)" "${expected}"
 echo "done"
