@@ -135,7 +135,7 @@ func (g *Given) Vppl3bgpPluginDefault() {
 	flavor := &local.FlavorLocal{}
 	deps := *flavor.InfraDeps(bgptol3testPluginName)
 
-	var w vppl3bgp.Watcher
+	var w bgp.Watcher
 	w = &g.vars.watcher
 	vppl3bgpPlugin := vppl3bgp.New(vppl3bgp.Deps{
 		PluginInfraDeps: deps,
@@ -149,7 +149,7 @@ func (g *Given) Vppl3bgpPlugin() {
 	flavor := &local.FlavorLocal{}
 	deps := *flavor.InfraDeps(bgptol3testPluginName)
 
-	var w vppl3bgp.Watcher
+	var w bgp.Watcher
 	w = &g.vars.watcher
 	vppl3bgpPlugin := vppl3bgp.New(vppl3bgp.Deps{
 		PluginInfraDeps: deps,

@@ -40,7 +40,7 @@ type pluginImpl struct {
 // Deps combines all needed dependencies for Plugin struct. These dependencies should be injected into Plugin by using constructor's Deps parameter.
 type Deps struct {
 	local.PluginInfraDeps //inject
-	Watcher               Watcher
+	Watcher               bgp.Watcher
 	Renderer              func(*bgp.ReachableIPRoute) //inject optional (mainly for testing purposes)
 }
 
@@ -88,10 +88,4 @@ func translate(info *bgp.ReachableIPRoute) *l3.StaticRoutes_Route {
 //Close ends the agreement between Plugin and watcher. Plugin stops sending watcher any further notifications.
 func (plugin *pluginImpl) Close() error {
 	return plugin.reg.Close()
-}
-
-//Watcher common interface between Ligato BGP Plugin for register watcher to notifications
-type Watcher interface {
-	//WatchIPRoutes register watcher to notifications for any new learned IP-based routes.
-	WatchIPRoutes(watcher string, callback func(*bgp.ReachableIPRoute)) (bgp.WatchRegistration, error)
 }
