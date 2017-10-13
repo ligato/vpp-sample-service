@@ -34,6 +34,7 @@ echo "done"
 #####Add Path##################################################
 echo "#### advertizing the path to the Route reflector docker container (background run)"
 .$VENDOR_BGP_AGENT_RR_DOCKER_SCRIPTS/addPath.sh &
+sleep 2
 echo "launched in the background"
 #####Start Vpp##################################################
 echo "#### starting of the VPP inside the bgp-to-vpp docker container (background run)"
@@ -50,6 +51,7 @@ echo "done"
 echo "#### validating Go example output"
 expected=("SendStaticRouteToVPP &{65001 101.0.0.0/24 101.0.10.1}
 ")
+echo "$(less log)"
 testOutput "$(less log)" "${expected}"
 echo "done"
 
@@ -60,6 +62,7 @@ sleep 5
 expected=("101.0.10.0/24
 arp-ipv4: via 101.0.10.1 memif0/1
 ")
+echo "$(less fib)"
 testOutput "$(less fib)" "${expected}"
 echo "done"
 
