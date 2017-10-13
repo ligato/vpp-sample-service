@@ -75,7 +75,10 @@ func main() {
 	deps := *flavor.InfraDeps(bgptol3PluginName)
 	deps.Log.SetLevel(logging.DebugLevel)
 
-	pluginInterface := newpluginVPPInterface(deps)
+	pluginInterface := &core.NamedPlugin{
+		PluginName: bgptol3PluginName,
+		Plugin:     &pluginVPPInterface{deps},
+	}
 
 	goBgpPlugin := gobgp.New(gobgp.Deps{
 		PluginInfraDeps: deps,
@@ -102,14 +105,6 @@ func main() {
 //pluginVPPInterface will create required memif for VPP
 type pluginVPPInterface struct {
 	local.PluginInfraDeps
-}
-
-// newpluginVPPInterface returns NamedPlugin with pluginVPPInterface plugin implementation.
-func newpluginVPPInterface(deps local.PluginInfraDeps) *core.NamedPlugin {
-	return &core.NamedPlugin{
-		PluginName: bgptol3PluginName,
-		Plugin:     &pluginVPPInterface{deps},
-	}
 }
 
 // Init creates initial structures inside VPP that are needed for prefix/next hop information sending.
