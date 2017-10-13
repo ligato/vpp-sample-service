@@ -19,6 +19,9 @@ import (
 	"testing"
 )
 
+//Test Vppl3bgp Plugin using
+// - Injected watcher for replicate plugin sending new route
+// - Injected renderer for check route is send outside to renderer as expected
 func TestVppl3bgpPlugin(x *testing.T) {
 	t := TestHelper{golangTesting: x}
 	t.DefaultSetup()
@@ -30,6 +33,9 @@ func TestVppl3bgpPlugin(x *testing.T) {
 	t.Then.WatcherRegistrationIsClosed()
 }
 
+//Test Vppl3bgp Plugin using
+// - Injected watcher for replicate plugin sending new route
+// - Default render for check no error when using default l3 plugin library
 func TestVppl3bgpPluginDefault(x *testing.T) {
 	t := TestHelper{golangTesting: x}
 	t.DefaultSetup()
@@ -40,6 +46,9 @@ func TestVppl3bgpPluginDefault(x *testing.T) {
 	t.Then.WatcherRegistrationIsClosed()
 }
 
+//Test Vppl3bgp Plugin using
+// - Injected watcher that will throw error when trying to register,
+// Expected Init core to fail under Vppl3bgp plugin
 func TestVppl3bgpPluginInitFail(x *testing.T) {
 	t := TestHelper{golangTesting: x}
 	t.DefaultSetup()
@@ -48,6 +57,9 @@ func TestVppl3bgpPluginInitFail(x *testing.T) {
 	t.Then.Vppl3bgpPluginInitFails()
 }
 
+//Test Vppl3bgp Plugin using
+// - Injected watcher that will throw error when trying to close registration ticket,
+// Expected Close core to fail under Vppl3bgp plugin
 func TestVppl3bgpPluginCloseFail(x *testing.T) {
 	t := TestHelper{golangTesting: x}
 	t.DefaultSetup()
