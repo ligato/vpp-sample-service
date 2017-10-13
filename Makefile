@@ -21,6 +21,14 @@ define build_example
     @echo "# done"
 endef
 
+# verify that links in markdown files are valid
+# requires npm install -g markdown-link-check
+define check_links_only
+    @echo "# checking links"
+    @./scripts/check_links.sh
+    @echo "# done"
+endef
+
 # run all tests with coverage
 define test_cover_only
 	@echo "# running unit tests with coverage analysis"
@@ -96,4 +104,8 @@ clean-examples:
 	@rm -f log
 	@rm -f fib
 
-.PHONY: build analysis install-tools install-dep update-dep run-examples all test test-cover clean-examples coverage
+# validate links in markdown files
+check_links:
+	$(call check_links_only)
+
+.PHONY: build analysis install-tools install-dep update-dep run-examples all test test-cover clean-examples coverage check_links
