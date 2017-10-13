@@ -12,6 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package examples contains several examples that illustrate various aspects of
-// VPP sample service functionality.
-package examples
+// Package plugins is the parent package for all VPP sample service plugins.
+package plugins

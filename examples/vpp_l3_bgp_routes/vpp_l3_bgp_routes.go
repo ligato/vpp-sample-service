@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package examples provide examples of BGP-VPP-Agent usage.
+// Package examples provide examples of Vpp sample service usage.
 package main
 
 import (
