@@ -8,6 +8,7 @@ contains:
 - A pre-built vpp ready to be used
 - A link with local environment Vpp sample service example
 
+This folder also contains some helper scripts. These scripts are meant to run without `sudo` command, therefore the environment for docker must be [altered accordingly](https://docs.docker.com/engine/installation/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
 ### Getting an Image from Dockerhub
 For a quick start with the Development image, you can use pre-built 
 Development docker images based on [Dockerhub](https://hub.docker.com/r/ligato/dev-vpp-agent/).

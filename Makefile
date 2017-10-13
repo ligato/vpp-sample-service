@@ -1,5 +1,7 @@
 include Makeroutines.mk
 
+COVER_DIR=/tmp/
+
 # run code analysis
 define analysis_only
 	@echo "# running code analysis"

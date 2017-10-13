@@ -16,7 +16,6 @@
 package main
 
 import (
-	"github.com/golang/protobuf/proto"
 	"github.com/ligato/bgp-agent/bgp/gobgp"
 	"github.com/ligato/cn-infra/core"
 	"github.com/ligato/cn-infra/datasync"
@@ -76,59 +75,58 @@ func main() {
 	deps := *flavor.InfraDeps(bgptol3PluginName)
 	deps.Log.SetLevel(logging.DebugLevel)
 
-	pluginInterface := &core.NamedPlugin{
-		PluginName: bgptol3PluginName,
-		Plugin:     &pluginVPPInterface{deps},
-	}
+	pluginInterface := newpluginVPPInterface(deps)
 
 	goBgpPlugin := gobgp.New(gobgp.Deps{
 		PluginInfraDeps: deps,
 		SessionConfig:   goBgpConfig})
 
-	// Create BGP-to-L3 plugin that is plugin of the Vpp Agent
 	bgptol3 := vppl3bgp.New(vppl3bgp.Deps{
 		PluginInfraDeps: deps,
 		Watcher:         goBgpPlugin,
 	})
 
-	// plugins set(=flavor) for local linux environment with vpp
-	flavour := local_flavor.FlavorVppLocal{}
-
-	flavour.VPP.Publish = &nilPublisher{}
-	flavour.VPP.PublishStatistics = &nilPublisher{}
-	flavour.VPP.IfStatePub = &nilPublisher{}
-
 	goBgpPluginCoreNamed := core.NamedPlugin{
 		PluginName: goBgpPlugin.PluginName,
 		Plugin:     goBgpPlugin}
 
-	// Create new ligato agent
-	agent := core.NewAgent(logroot.StandardLogger(), 4*time.Minute, append(flavour.Plugins(), pluginInterface,
+	agent := core.NewAgent(logroot.StandardLogger(), 4*time.Minute, append(getVPPplugins(), pluginInterface,
 		&bgptol3, &goBgpPluginCoreNamed)...)
 
-	// Run agent in event loop
 	err := core.EventLoopWithInterrupt(agent, nil)
 	if err != nil {
 		os.Exit(1)
 	}
 }
 
+//pluginVPPInterface will create required memif for VPP
 type pluginVPPInterface struct {
 	local.PluginInfraDeps
 }
 
+// newpluginVPPInterface returns NamedPlugin with pluginVPPInterface plugin implementation.
+func newpluginVPPInterface(deps local.PluginInfraDeps) *core.NamedPlugin {
+	return &core.NamedPlugin{
+		PluginName: bgptol3PluginName,
+		Plugin:     &pluginVPPInterface{deps},
+	}
+}
+
 // Init creates initial structures inside VPP that are needed for prefix/next hop information sending.
+// In case of problems with memif creation error informing the issue will be returned, otherwise nil will be returned
 func (plugin *pluginVPPInterface) Init() error {
 	return localclient.DataResyncRequest(bgptol3PluginName).Interface(&memif1AsMaster).Send().ReceiveReply()
 }
 
-type nilPublisher struct{}
+// creates deaults VPP plugins
+func getVPPplugins() []*core.NamedPlugin {
+	flavour := local_flavor.FlavorVppLocal{}
 
-func (*nilPublisher) Put(key string, data proto.Message, opts ...datasync.PutOption) error {
-	return nil
-}
-
-// Close closes pluginVPPInterface
-func (plugin *pluginVPPInterface) Close() error {
-	return nil
+	// no operation writer that helps avoiding NIL pointer based segmentation fault
+	// used as default if some dependency was not injected
+	noopWriter := &datasync.CompositeKVProtoWriter{Adapters: []datasync.KeyProtoValWriter{}}
+	flavour.VPP.Publish = noopWriter
+	flavour.VPP.PublishStatistics = noopWriter
+	flavour.VPP.IfStatePub = noopWriter
+	return flavour.Plugins()
 }
