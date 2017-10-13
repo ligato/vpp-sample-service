@@ -21,6 +21,14 @@ define build_example
     @echo "# done"
 endef
 
+# run all tests with coverage
+define test_cover_only
+	@echo "# running unit tests with coverage analysis"
+	@go test -covermode=count -coverprofile=${COVER_DIR}coverage.out ./plugins/vppl3bgp
+    @echo "# coverage data generated into ${COVER_DIR}coverage.out"
+    @echo "# done"
+endef
+
 # run all targets
 all:
 	@echo "# running all"
@@ -29,6 +37,7 @@ all:
 	@make update-dep
 	@make analysis
 	@make build
+	@make test-cover
 	@make run-examples
 	@make clean-examples
 
@@ -63,12 +72,16 @@ update-dep:
 # get coverage percentage
 coverage:
 	@echo "# getting test coverage"
-	@go test -cover $$(go list ./... | grep -v /vendor/)
+	@go test -cover $$(go list ./plugins/... | grep -v /vendor/)
 
 # run all tests
 test:
 	@echo "# running unit tests"
 	@go test $$(go list ./... | grep -v /vendor/)
+
+# run tests with coverage report
+test-cover:
+	$(call test_cover_only)
 
 # run examples
 run-examples:
@@ -80,7 +93,7 @@ run-examples:
 clean-examples:
 	@rm -f examples/gobgp_watch_plugin/gobgp_watch_plugin
 	@rm -f docker/gobgp_route_reflector/gobgp-client-in-docker/log
-	@rm -f ./log
-	@rm -f ./fib
+	@rm -f log
+	@rm -f fib
 
-.PHONY: build analysis clean-example install-tools install-dep update-dep run-examples all
+.PHONY: build analysis install-tools install-dep update-dep run-examples all test test-cover clean-examples coverage
