@@ -31,13 +31,14 @@ const pluginID core.PluginName = "bgp-to-l3-plugin"
 const description = "configuration used for Ligato VPP BGP"
 
 // Plugin with BGP functionality (VPP Agent plugin that servers as BGP-VPP Agent)
-// it handles information coming for BGP-Agent channel and sends them transformed to L3 default plugin.
+// it handles information coming for BGP-Agent callback and sends them transformed to L3 default plugin.
 type pluginImpl struct {
 	Deps
 	reg bgp.WatchRegistration
 }
 
-// Deps combines all needed dependencies for Plugin struct. These dependencies should be injected into Plugin by using constructor's Deps parameter.
+// Deps combines all needed dependencies for Plugin struct. These dependencies should be injected into Plugin by using
+// constructor's Deps parameter.
 type Deps struct {
 	local.PluginInfraDeps //inject
 	Watcher               bgp.Watcher
@@ -55,8 +56,9 @@ func New(deps Deps) core.NamedPlugin {
 	}
 }
 
-// Init logs attempt of plugin initialization to be sure that plugin is properly recognized. No initialization
-// of plugin is not needed yet.
+// Init registers injected renderer to watcher plugin, in the case it is not provided default l3 plugin renderer
+// will be used. Registration will return a registration ticket and error containing the reason of the fail if the
+// registration was not successful
 func (plugin *pluginImpl) Init() error {
 	if plugin.Deps.Renderer == nil {
 		plugin.Deps.Renderer = func(route *bgp.ReachableIPRoute) {
@@ -74,7 +76,7 @@ func (plugin *pluginImpl) Init() error {
 	return err
 }
 
-// translate translates bgp information from BGP-Agent API to VPP-Agent API.
+// translate translates IP-based route from BGP-Agent API to VPP-Agent API.
 func translate(info *bgp.ReachableIPRoute) *l3.StaticRoutes_Route {
 	return &l3.StaticRoutes_Route{
 		VrfId:       0,
@@ -86,6 +88,7 @@ func translate(info *bgp.ReachableIPRoute) *l3.StaticRoutes_Route {
 }
 
 //Close ends the agreement between Plugin and watcher. Plugin stops sending watcher any further notifications.
+//When the ending of agreement is not successful, error from it is passed as result of this function.
 func (plugin *pluginImpl) Close() error {
 	return plugin.reg.Close()
 }
